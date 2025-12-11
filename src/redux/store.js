@@ -1,23 +1,28 @@
-import { createStore, applyMiddleware } from "redux";
-import thunk from "redux-thunk";
-import { composeWithDevTools } from "redux-devtools-extension"
+import { createStore, applyMiddleware, compose } from "redux";
+import { thunk } from "redux-thunk";
 import rootReducer from "./modules";
 import { setAuthToken } from "../utils";
 
 const initialState = {};
 
-const store = createStore(rootReducer, initialState, composeWithDevTools(applyMiddleware(thunk)) );
+const composeEnhancers = window._REDUX_DEVTOOLS_EXTENSION_COMPOSE_ || compose;
 
-let currentState = store.getState()
+const store = createStore(
+  rootReducer,
+  initialState,
+  composeEnhancers(applyMiddleware(thunk))
+);
 
-store.subscribe(()=> {
-    let previousState = currentState
-    currentState = store.getState()
+let currentState = store.getState();
 
-    if(previousState.users.token !== currentState.users.token) {
-        const token = currentState.users.token
-        setAuthToken(token)
-    }
-})
+store.subscribe(() => {
+  const previousState = currentState;
+  currentState = store.getState();
+
+  if (previousState.users?.token !== currentState.users?.token) {
+    const token = currentState.users?.token;
+    setAuthToken(token);
+  }
+});
 
 export default store;
